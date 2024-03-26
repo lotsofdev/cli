@@ -1,0 +1,38 @@
+{
+  "name": "@lotsof/cli",
+  "description": "An easy to use cli that allows you to import reusable components and more.",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "test": "vitest"
+  },
+  "bin": {
+    "lotsof": "./dist/node/index.js"
+  },
+  "homepage": "https://components.lotsof.dev",
+  "author": "Lotsof <hello@lotsof.dev> (https://lotsof.dev)",
+  "contributors": [
+    {
+      "name": "Olivier Bossel",
+      "email": "olivier.bossel@gmail.com",
+      "url": "http://olivierbossel.com"
+    }
+  ],
+  "license": "MIT",
+  "globalDependencies": {},
+  "exports": {},
+  "devDependencies": {
+    "@types/figlet": "^1.5.8",
+    "@types/node": "^20.11.30",
+    "typescript": "^5.4.3",
+    "vitest": "^1.3.1"
+  },
+  "dependencies": {
+    "@lotsof/sugar": "^0.0.1",
+    "commander": "^12.0.0",
+    "figlet": "^1.7.0",
+    "glob": "^10.3.10"
+  }
+}

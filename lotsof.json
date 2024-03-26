@@ -1,0 +1,11 @@
+{
+  "components": {
+    "sources": {
+      "@lotsof/components": {
+        "name": "Lotsof components",
+        "type": "git",
+        "repository": "git@github.com:lotsofdev/components.git"
+      }
+    }
+  }
+}

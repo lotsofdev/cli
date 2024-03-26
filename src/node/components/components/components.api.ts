@@ -1,3 +1,4 @@
+import { __parseHtml } from '@lotsof/sugar/console';
 import { __dirname, __readJsonSync } from '@lotsof/sugar/fs';
 import { __packageRootDir } from '@lotsof/sugar/path';
 import __Components from './Components.js';
@@ -11,6 +12,16 @@ for (let [id, sourceMetas] of Object.entries(lotsofJson.components?.sources)) {
   __Components.registerSourceFromMetas(id, <IComponentSourceMetas>sourceMetas);
 }
 
+const nativeConsoleLog = console.log;
+console.log = (...args): void => {
+  args.forEach((arg) => {
+    if (typeof arg === 'string') {
+      arg = __parseHtml(arg);
+    }
+    nativeConsoleLog(arg);
+  });
+};
+
 export default function __registerCommands(program: any): void {
   program.command('components.ls').action(async () => {
     console.log(
@@ -23,17 +34,33 @@ export default function __registerCommands(program: any): void {
     const components = await __Components.listComponents();
 
     console.log(components);
+
+    for (let [sourceId, source] of Object.entries(components.sources)) {
+      console.log('\n');
+      console.log(`<bgYellow> </bgYellow><yellow> ${sourceId} </yellow>`);
+
+      for (let [componentId, component] of Object.entries(
+        components.components,
+      )) {
+        // list only components from the source
+        if (component.source !== sourceId) continue;
+
+        console.log(`<bgYellow> </bgYellow>   ${component.name}`);
+      }
+    }
   });
 
   program.command('components.update').action(async () => {
     console.log(
-      `Updating components from ${
+      `Updating components from <yellow>${
         Object.keys(__Components.getSources()).length
-      } source(s)...`,
+      }</yellow> source(s)...`,
     );
 
     // update sources
     await __Components.updateSources();
+
+    console.log('Components updated <green>successfully!</green>');
   });
 
   program

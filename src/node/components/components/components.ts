@@ -57,6 +57,7 @@ export default class Component {
 
     // list components from source
     for (let [sourceId, source] of Object.entries(this.getSources())) {
+      console.log('sou', sourceId);
       // filter if needed
       if (sourceIds && !sourceIds.includes(sourceId)) {
         continue;

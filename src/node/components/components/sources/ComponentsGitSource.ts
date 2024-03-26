@@ -1,11 +1,11 @@
 import * as __childProcess from 'child_process';
 import { homedir as __homedir } from 'os';
+import ComponentSource from '../ComponentsSource.js';
 import type {
   IComponentGitSourceMetas,
   IComponentSourceUpdateResult,
   IGitSourceSettings,
 } from '../components.types.js';
-import ComponentSource from '../ComponentsSource.js';
 
 export default class GitSource extends ComponentSource {
   private _repositoryUrl: string;
@@ -34,13 +34,15 @@ export default class GitSource extends ComponentSource {
     const output = res.output?.toString() ?? '';
 
     if (output.includes('already exists')) {
-      console.log(`Updating the "${this._repositoryUrl}" repository...`);
+      console.log(
+        `Updating the "<yellow>${this.id}</yellow>" source from the "<cyan>${this._repositoryUrl}</cyan>" repository...`,
+      );
       // try to pull the repo
       const pullRes = await __childProcess.spawnSync(`git pull`, [], {
         cwd: this.localDir,
         shell: true,
       });
-      const pullOutput = pullRes.output?.toString() ?? '';
+      const pullOutput = pullRes.output?.toString().split(',').join('') ?? '';
       console.log(pullOutput);
     }
 

@@ -1,25 +1,33 @@
 import {
-  IComponentGitSourceMetas,
-  IComponentList,
-  IComponentSourceMetas,
-  IComponentSourceUpdateResult,
+  IComponentsGitSourceMetas,
+  IComponentsList,
+  IComponentsSourceMetas,
+  IComponentsSourceUpdateResult,
 } from './components.types.js';
+import ComponentPackage from './ComponentsPackage.js';
 import ComponentSource from './ComponentsSource.js';
 import ComponentGitSource from './sources/ComponentsGitSource.js';
 
+import { __readJsonSync } from '@lotsof/sugar/fs';
+
+import { globSync as __globSync } from 'glob';
+
+import { homedir as __homedir } from 'os';
+
 export default class Component {
   private static _sources: Record<string, ComponentSource> = {};
+  public static dir: string = `${__homedir()}/.lotsof/components`;
 
   static registerSourceFromMetas(
     id: string,
-    sourceMetas: IComponentSourceMetas,
+    sourceMetas: IComponentsSourceMetas,
   ): ComponentSource | undefined {
     let source: ComponentGitSource;
     switch (sourceMetas.type) {
       case 'git':
         source = new ComponentGitSource(
           sourceMetas.name,
-          sourceMetas as IComponentGitSourceMetas,
+          sourceMetas as IComponentsGitSourceMetas,
         );
         break;
     }
@@ -40,7 +48,7 @@ export default class Component {
     return this._sources;
   }
 
-  static async updateSources(): Promise<IComponentSourceUpdateResult> {
+  static async updateSources(): Promise<IComponentsSourceUpdateResult> {
     // updating sources
     for (let [sourceId, source] of Object.entries(this.getSources())) {
       await source.update();
@@ -49,34 +57,41 @@ export default class Component {
     return {};
   }
 
-  static async listComponents(sourceIds?: string[]): Promise<IComponentList> {
-    const componentsList: IComponentList = {
-      sources: {},
+  static listPackages(): Record<string, ComponentPackage> {
+    const packages: Record<string, ComponentPackage> = {};
+    const lotsofJsons = __globSync([
+      `${this.dir}/*/lotsof.json`,
+      `${this.dir}/*/*/lotsof.json`,
+    ]);
+
+    for (let [i, lotsofJsonPath] of lotsofJsons.entries()) {
+      const lotsofJson = __readJsonSync(lotsofJsonPath);
+
+      const p = new ComponentPackage(
+        `${lotsofJsonPath.replace('/lotsof.json', '')}`,
+      );
+      packages[lotsofJson.name] = p;
+    }
+
+    return packages;
+  }
+
+  static async listComponents(sourceIds?: string[]): Promise<IComponentsList> {
+    const componentsList: IComponentsList = {
+      sources: this.getSources(),
+      packages: this.listPackages(),
       components: {},
     };
 
-    // list components from source
-    for (let [sourceId, source] of Object.entries(this.getSources())) {
-      console.log('sou', sourceId);
-      // filter if needed
-      if (sourceIds && !sourceIds.includes(sourceId)) {
-        continue;
+    const packages = this.listPackages();
+    for (let [packageName, packageObj] of Object.entries(packages)) {
+      const components = packageObj.listComponents();
+      for (let [componentId, component] of Object.entries(components)) {
+        componentsList.components[`${packageName}/${component.name}`] =
+          component;
       }
-
-      componentsList.sources[sourceId] = source.metas;
-      componentsList.components = await source.listComponents();
     }
 
     return componentsList;
-  }
-
-  static listComponentsFromSource(sourceId: string): any {
-    if (!this._sources[sourceId]) {
-      throw new Error(
-        `The requested source "${sourceId}" does not exists. Here's the list of available sources:\n-${Object.keys(
-          this._sources,
-        ).join('\n-')}`,
-      );
-    }
   }
 }

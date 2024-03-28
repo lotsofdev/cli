@@ -2,14 +2,14 @@ import { __parseHtml } from '@lotsof/sugar/console';
 import { __dirname, __readJsonSync } from '@lotsof/sugar/fs';
 import { __packageRootDir } from '@lotsof/sugar/path';
 import __Components from './Components.js';
-import { IComponentSourceMetas } from './components.types.js';
+import { IComponentsSourceMetas } from './components.types.js';
 
 // get the lotsof file path from this package to register defaults
 const packageRootDir = __packageRootDir(__dirname()),
   lotsofJson = __readJsonSync(`${packageRootDir}/lotsof.json`);
 
 for (let [id, sourceMetas] of Object.entries(lotsofJson.components?.sources)) {
-  __Components.registerSourceFromMetas(id, <IComponentSourceMetas>sourceMetas);
+  __Components.registerSourceFromMetas(id, <IComponentsSourceMetas>sourceMetas);
 }
 
 const nativeConsoleLog = console.log;
@@ -32,21 +32,12 @@ export default function __registerCommands(program: any): void {
 
     // list components
     const components = await __Components.listComponents();
-
-    console.log(components);
-
-    for (let [sourceId, source] of Object.entries(components.sources)) {
-      console.log('\n');
-      console.log(`<bgYellow> </bgYellow><yellow> ${sourceId} </yellow>`);
-
-      for (let [componentId, component] of Object.entries(
-        components.components,
-      )) {
-        // list only components from the source
-        if (component.source !== sourceId) continue;
-
-        console.log(`<bgYellow> </bgYellow>   ${component.name}`);
-      }
+    for (let [componentId, component] of Object.entries(
+      components.components,
+    )) {
+      console.log(
+        `<bgYellow> </bgYellow>   <cyan>${component.package.name}</cyan>/${component.name} (<magenta>${component.version}</magenta>)`,
+      );
     }
   });
 

@@ -1,30 +1,41 @@
-export interface IComponentSourceMetas {
+import ComponentPackage from './ComponentsPackage.js';
+
+export interface IComponentsSourceMetas {
   name: string;
   type: string;
+  dir: string;
 }
 
-export interface IComponentGitSourceMetas extends IComponentSourceMetas {
+export interface IComponentsGitSourceMetas extends IComponentsSourceMetas {
   repository: string;
-  settings?: IGitSourceSettings;
+  settings?: IComponentGitSourceSettings;
 }
 
-export interface IComponentSource extends IComponentSourceMetas {
-  metas(): IComponentSourceMetas;
-  list(args: IComponentListArgs): IComponentList;
+export interface IComponentSource extends IComponentsSourceMetas {
+  metas(): IComponentsSourceMetas;
+  list(args: IComponentsListArgs): IComponentsList;
 }
 
-export interface IComponentSourceSettings {
-  localDir?: string;
+export interface IComponentsSourceSettings {
+  rootDir: string;
 }
 
-export interface IGitSourceSettings extends IComponentSourceSettings {}
+export interface IComponentGitSourceSettings
+  extends IComponentsSourceSettings {}
+
+export interface IComponentsPackageSettings {}
+
+export interface IComponentsPackageMetas {
+  dir: string;
+}
 
 export interface IComponent {
-  source: string;
-  path: string;
-  absPath: string;
+  version: string;
   name: string;
   description?: string;
+  package: ComponentPackage;
+  path: string;
+  absPath: string;
 }
 
 export interface IComponentPackage {
@@ -32,11 +43,12 @@ export interface IComponentPackage {
   path: string;
 }
 
-export interface IComponentSourceUpdateResult {}
+export interface IComponentsSourceUpdateResult {}
 
-export interface IComponentList {
-  sources: Record<string, IComponentSourceMetas>;
+export interface IComponentsList {
+  sources: Record<string, IComponentsSourceMetas>;
+  packages: Record<string, ComponentPackage>;
   components: Record<string, IComponent>;
 }
 
-export interface IComponentListArgs {}
+export interface IComponentsListArgs {}

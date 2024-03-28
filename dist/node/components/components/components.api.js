@@ -31,16 +31,8 @@ export default function __registerCommands(program) {
         console.log(`Listing components from ${Object.keys(__Components.getSources()).length} source(s)...`);
         // list components
         const components = yield __Components.listComponents();
-        console.log(components);
-        for (let [sourceId, source] of Object.entries(components.sources)) {
-            console.log('\n');
-            console.log(`<bgYellow> </bgYellow><yellow> ${sourceId} </yellow>`);
-            for (let [componentId, component] of Object.entries(components.components)) {
-                // list only components from the source
-                if (component.source !== sourceId)
-                    continue;
-                console.log(`<bgYellow> </bgYellow>   ${component.name}`);
-            }
+        for (let [componentId, component] of Object.entries(components.components)) {
+            console.log(`<bgYellow> </bgYellow>   <cyan>${component.package.name}</cyan>/${component.name} (<magenta>${component.version}</magenta>)`);
         }
     }));
     program.command('components.update').action(() => __awaiter(this, void 0, void 0, function* () {

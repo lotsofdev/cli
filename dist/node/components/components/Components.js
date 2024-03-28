@@ -7,7 +7,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+import ComponentPackage from './ComponentsPackage.js';
 import ComponentGitSource from './sources/ComponentsGitSource.js';
+import { __readJsonSync } from '@lotsof/sugar/fs';
+import { globSync as __globSync } from 'glob';
+import { homedir as __homedir } from 'os';
 class Component {
     static registerSourceFromMetas(id, sourceMetas) {
         let source;
@@ -39,31 +43,39 @@ class Component {
             return {};
         });
     }
+    static listPackages() {
+        const packages = {};
+        const lotsofJsons = __globSync([
+            `${this.dir}/*/lotsof.json`,
+            `${this.dir}/*/*/lotsof.json`,
+        ]);
+        for (let [i, lotsofJsonPath] of lotsofJsons.entries()) {
+            const lotsofJson = __readJsonSync(lotsofJsonPath);
+            const p = new ComponentPackage(`${lotsofJsonPath.replace('/lotsof.json', '')}`);
+            packages[lotsofJson.name] = p;
+        }
+        return packages;
+    }
     static listComponents(sourceIds) {
         return __awaiter(this, void 0, void 0, function* () {
             const componentsList = {
-                sources: {},
+                sources: this.getSources(),
+                packages: this.listPackages(),
                 components: {},
             };
-            // list components from source
-            for (let [sourceId, source] of Object.entries(this.getSources())) {
-                console.log('sou', sourceId);
-                // filter if needed
-                if (sourceIds && !sourceIds.includes(sourceId)) {
-                    continue;
+            const packages = this.listPackages();
+            for (let [packageName, packageObj] of Object.entries(packages)) {
+                const components = packageObj.listComponents();
+                for (let [componentId, component] of Object.entries(components)) {
+                    componentsList.components[`${packageName}/${component.name}`] =
+                        component;
                 }
-                componentsList.sources[sourceId] = source.metas;
-                componentsList.components = yield source.listComponents();
             }
             return componentsList;
         });
     }
-    static listComponentsFromSource(sourceId) {
-        if (!this._sources[sourceId]) {
-            throw new Error(`The requested source "${sourceId}" does not exists. Here's the list of available sources:\n-${Object.keys(this._sources).join('\n-')}`);
-        }
-    }
 }
 Component._sources = {};
+Component.dir = `${__homedir()}/.lotsof/components`;
 export default Component;
 //# sourceMappingURL=Components.js.map

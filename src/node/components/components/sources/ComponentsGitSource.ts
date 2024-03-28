@@ -1,30 +1,22 @@
 import * as __childProcess from 'child_process';
-import { homedir as __homedir } from 'os';
 import ComponentSource from '../ComponentsSource.js';
 import type {
-  IComponentGitSourceMetas,
-  IComponentSourceUpdateResult,
-  IGitSourceSettings,
+  IComponentsGitSourceMetas,
+  IComponentsSourceUpdateResult,
 } from '../components.types.js';
 
 export default class GitSource extends ComponentSource {
   private _repositoryUrl: string;
 
-  public settings: IGitSourceSettings = {};
-
-  constructor(name: string, metas: IComponentGitSourceMetas) {
-    super(name);
-    this.settings = {
-      localDir: `${__homedir()}/.lotsof/components/git`,
-      ...(metas.settings ?? {}),
-    };
+  constructor(name: string, metas: IComponentsGitSourceMetas) {
+    super(name, 'git', metas.settings);
     this._repositoryUrl = metas.repository;
   }
 
-  async update(): Promise<IComponentSourceUpdateResult> {
+  async update(): Promise<IComponentsSourceUpdateResult> {
     // cloning the repo
     const res = await __childProcess.spawnSync(
-      `git clone ${this._repositoryUrl} ${this.localDir}`,
+      `git clone ${this._repositoryUrl} ${this.dir}`,
       [],
       {
         shell: true,
@@ -39,7 +31,7 @@ export default class GitSource extends ComponentSource {
       );
       // try to pull the repo
       const pullRes = await __childProcess.spawnSync(`git pull`, [], {
-        cwd: this.localDir,
+        cwd: this.dir,
         shell: true,
       });
       const pullOutput = pullRes.output?.toString().split(',').join('') ?? '';

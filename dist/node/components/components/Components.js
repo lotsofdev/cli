@@ -7,75 +7,74 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import ComponentPackage from './ComponentsPackage.js';
 import ComponentGitSource from './sources/ComponentsGitSource.js';
-import { __readJsonSync } from '@lotsof/sugar/fs';
+import __path from 'path';
 import { globSync as __globSync } from 'glob';
-import { homedir as __homedir } from 'os';
-class Component {
-    static registerSourceFromMetas(id, sourceMetas) {
+import ComponentPackage from './ComponentsPackage.js';
+export default class Components {
+    get rootDir() {
+        return this.settings.rootDir;
+    }
+    constructor(settings) {
+        this._sources = {};
+        this.settings = settings;
+    }
+    registerSourceFromSettings(settings) {
         let source;
-        switch (sourceMetas.type) {
+        settings.components = this;
+        switch (settings.type) {
             case 'git':
-                source = new ComponentGitSource(sourceMetas.name, sourceMetas);
+                source = new ComponentGitSource(settings);
                 break;
         }
         // @ts-ignore
         if (!source) {
             return;
         }
-        return this.registerSource(id, source);
+        return this.registerSource(source);
     }
-    static registerSource(id, source) {
-        source.id = id;
-        this._sources[id] = source;
-        return this._sources[id];
+    registerSource(source) {
+        this._sources[source.id] = source;
+        return this._sources[source.id];
     }
-    static getSources() {
+    listSources() {
         return this._sources;
     }
-    static updateSources() {
+    updateSources() {
         return __awaiter(this, void 0, void 0, function* () {
             // updating sources
-            for (let [sourceId, source] of Object.entries(this.getSources())) {
+            for (let [sourceId, source] of Object.entries(this.listSources())) {
                 yield source.update();
             }
-            return {};
+            return {
+                sources: this.listSources(),
+            };
         });
     }
-    static listPackages() {
+    listPackages(sourceIds) {
         const packages = {};
-        const lotsofJsons = __globSync([
-            `${this.dir}/*/lotsof.json`,
-            `${this.dir}/*/*/lotsof.json`,
+        // list components in the root folder
+        const lotsofJsonFiles = __globSync([
+            `${this.rootDir}/*/lotsof.json`,
+            `${this.rootDir}/*/*/lotsof.json`,
         ]);
-        for (let [i, lotsofJsonPath] of lotsofJsons.entries()) {
-            const lotsofJson = __readJsonSync(lotsofJsonPath);
-            const p = new ComponentPackage(`${lotsofJsonPath.replace('/lotsof.json', '')}`);
-            packages[lotsofJson.name] = p;
+        for (let [i, jsonPath] of lotsofJsonFiles.entries()) {
+            const p = new ComponentPackage({
+                rootDir: __path.dirname(jsonPath),
+                components: this,
+            });
+            packages[p.name] = p;
         }
         return packages;
     }
-    static listComponents(sourceIds) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const componentsList = {
-                sources: this.getSources(),
-                packages: this.listPackages(),
-                components: {},
-            };
-            const packages = this.listPackages();
-            for (let [packageName, packageObj] of Object.entries(packages)) {
-                const components = packageObj.listComponents();
-                for (let [componentId, component] of Object.entries(components)) {
-                    componentsList.components[`${packageName}/${component.name}`] =
-                        component;
-                }
-            }
-            return componentsList;
-        });
+    listComponents(sourceIds) {
+        let componentsList = {};
+        const packages = this.listPackages(sourceIds);
+        for (let [packageName, p] of Object.entries(packages)) {
+            const components = p.listComponents();
+            componentsList = Object.assign(Object.assign({}, componentsList), components);
+        }
+        return componentsList;
     }
 }
-Component._sources = {};
-Component.dir = `${__homedir()}/.lotsof/components`;
-export default Component;
 //# sourceMappingURL=Components.js.map

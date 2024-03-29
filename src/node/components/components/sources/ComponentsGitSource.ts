@@ -1,22 +1,25 @@
 import * as __childProcess from 'child_process';
-import ComponentSource from '../ComponentsSource.js';
 import type {
-  IComponentsGitSourceMetas,
+  IComponentGitSourceSettings,
   IComponentsSourceUpdateResult,
 } from '../components.types.js';
+import ComponentSource from '../ComponentsSource.js';
 
 export default class GitSource extends ComponentSource {
-  private _repositoryUrl: string;
+  // @ts-ignore
+  public settings: IComponentGitSourceSettings;
 
-  constructor(name: string, metas: IComponentsGitSourceMetas) {
-    super(name, 'git', metas.settings);
-    this._repositoryUrl = metas.repository;
+  constructor(settings: IComponentGitSourceSettings) {
+    settings.type = 'git';
+    super(settings);
   }
 
   async update(): Promise<IComponentsSourceUpdateResult> {
+    let updated = false;
+
     // cloning the repo
     const res = await __childProcess.spawnSync(
-      `git clone ${this._repositoryUrl} ${this.dir}`,
+      `git clone ${this.settings.repository} ${this.components.rootDir}/${this.id}`,
       [],
       {
         shell: true,
@@ -24,20 +27,24 @@ export default class GitSource extends ComponentSource {
     );
 
     const output = res.output?.toString() ?? '';
+    updated = !output.match(/already exists/);
 
     if (output.includes('already exists')) {
-      console.log(
-        `Updating the "<yellow>${this.id}</yellow>" source from the "<cyan>${this._repositoryUrl}</cyan>" repository...`,
-      );
+      // console.log(
+      //   `Updating the "<yellow>${this.id}</yellow>" source from the "<cyan>${this.settings.repository}</cyan>" repository...`,
+      // );
+
       // try to pull the repo
       const pullRes = await __childProcess.spawnSync(`git pull`, [], {
-        cwd: this.dir,
+        cwd: `${this.components.rootDir}/${this.id}`,
         shell: true,
       });
       const pullOutput = pullRes.output?.toString().split(',').join('') ?? '';
-      console.log(pullOutput);
+      // console.log(pullOutput);
+
+      updated = !pullOutput.match(/Already up to date/);
     }
 
-    return super.update();
+    return super.update(!updated);
   }
 }

@@ -1,66 +1,70 @@
 import type {
-  IComponentsSourceMetas,
   IComponentsSourceSettings,
   IComponentsSourceUpdateResult,
 } from './components.types.js';
 
-import __Component from './Components.js';
-
 import { __readJsonSync } from '@lotsof/sugar/fs';
+import Components from './Components.js';
 
 export default abstract class ComponentSource {
-  public id: string = '';
-  public name: string = 'Unimplementedsource';
-  public type: string = 'unknown';
   public settings: IComponentsSourceSettings;
 
-  public get dir(): string {
-    return `${this.settings.rootDir}/${this.id}`;
+  public updated: boolean = false;
+
+  public get id(): string {
+    return this.settings.id;
   }
 
-  constructor(
-    name: string,
-    type: string,
-    settings: Partial<IComponentsSourceSettings> = {},
-  ) {
-    this.name = name;
-    this.type = type;
-    this.settings = {
-      rootDir: __Component.dir,
-      ...settings,
-    };
+  public get rootDir(): string {
+    return `${this.components.rootDir}/${this.id}`;
   }
 
-  get metas(): IComponentsSourceMetas {
-    return {
-      name: this.name,
-      type: this.type,
-      dir: this.dir,
-    };
+  public get components(): Components {
+    return this.settings.components;
   }
-  async update(): Promise<IComponentsSourceUpdateResult> {
+
+  public get name(): string {
+    return this.settings.name;
+  }
+
+  public get type(): string {
+    return this.settings.type;
+  }
+
+  constructor(settings: Partial<IComponentsSourceSettings> = {}) {
+    this.settings = <IComponentsSourceSettings>settings;
+  }
+
+  async update(
+    updated: boolean = false,
+  ): Promise<IComponentsSourceUpdateResult> {
+    // set if updated or not
+    this.updated = updated;
+
     // get the lotsof.json file from the updated component
-    const lotsofJson = __readJsonSync(`${this.dir}/lotsof.json`);
+    const lotsofJson = __readJsonSync(`${this.rootDir}/lotsof.json`);
 
     // check dependencies
-    for (let [id, sourceMetas] of Object.entries(
+    for (let [id, sourceSettings] of Object.entries(
       lotsofJson.components?.dependencies ?? {},
     )) {
       // if source already registered, avoid continue
-      if (__Component.getSources()[id]) {
+      if (this.components?.listSources()[id]) {
         continue;
       }
 
       // register new source
-      const newSource = __Component.registerSourceFromMetas(
-        id,
-        <IComponentsSourceMetas>sourceMetas,
+      (<IComponentsSourceSettings>sourceSettings).id = id;
+      const newSource = this.components?.registerSourceFromSettings(
+        <IComponentsSourceSettings>sourceSettings,
       );
 
       // updating new source
       await newSource?.update();
     }
 
-    return {};
+    return {
+      updated,
+    };
   }
 }

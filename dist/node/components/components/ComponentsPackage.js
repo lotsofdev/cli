@@ -2,22 +2,29 @@ import { __existsSync } from '@lotsof/sugar/fs';
 import { globSync as __globSync } from 'glob';
 import { __readJsonSync } from '@lotsof/sugar/fs';
 export default class ComponentPackage {
-    constructor(dir, settings = {}) {
-        this.dir = dir;
-        this.settings = Object.assign({}, settings);
-        // reading the "lotsof.json" file
-        const lotsofJson = __readJsonSync(`${this.dir}/lotsof.json`);
-        this.name = lotsofJson.name;
+    get name() {
+        return this.json.name;
     }
-    get metas() {
-        return {
-            dir: this.dir,
-        };
+    get description() {
+        var _a;
+        return (_a = this.json.description) !== null && _a !== void 0 ? _a : this.name;
+    }
+    get rootDir() {
+        return this.settings.rootDir;
+    }
+    get version() {
+        return this.json.version;
+    }
+    constructor(settings) {
+        this.settings = settings;
+        // reading the "lotsof.json" file
+        const lotsofJson = __readJsonSync(`${this.rootDir}/lotsof.json`);
+        this.json = lotsofJson;
     }
     listComponents() {
         var _a;
         // reading the "lotsof.json" file
-        const lotsofJson = __readJsonSync(`${this.dir}/lotsof.json`), componentsList = {};
+        const lotsofJson = __readJsonSync(`${this.rootDir}/lotsof.json`), componentsList = {};
         // check if we have the "components.folders" settings
         let folders = ['src/components/*'];
         if ((_a = lotsofJson.components) === null || _a === void 0 ? void 0 : _a.folders) {
@@ -26,10 +33,10 @@ export default class ComponentPackage {
         // list components
         for (let [i, path] of folders.entries()) {
             const components = __globSync(path, {
-                cwd: this.dir,
+                cwd: this.rootDir,
             });
             for (let [j, componentPath] of components.entries()) {
-                const componentJsonPath = `${this.dir}/${componentPath}/component.json`;
+                const componentJsonPath = `${this.rootDir}/${componentPath}/component.json`;
                 // make sure e have a component.json file
                 if (!__existsSync(componentJsonPath)) {
                     continue;
@@ -37,7 +44,7 @@ export default class ComponentPackage {
                 const componentJson = __readJsonSync(componentJsonPath);
                 componentJson.package = this;
                 componentJson.path = componentPath;
-                componentJson.absPath = `${this.dir}/${componentPath}`;
+                componentJson.absPath = `${this.rootDir}/${componentPath}`;
                 componentsList[`${this.name}/${componentJson.name}`] = componentJson;
             }
         }

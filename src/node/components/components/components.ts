@@ -1,95 +1,98 @@
 import {
-  IComponentsGitSourceMetas,
-  IComponentsList,
-  IComponentsSourceMetas,
-  IComponentsSourceUpdateResult,
+  IComponent,
+  IComponentGitSourceSettings,
+  IComponentsSettings,
+  IComponentsSourceSettings,
+  IComponentsSourcesUpdateResult,
 } from './components.types.js';
-import ComponentPackage from './ComponentsPackage.js';
 import ComponentSource from './ComponentsSource.js';
 import ComponentGitSource from './sources/ComponentsGitSource.js';
 
-import { __readJsonSync } from '@lotsof/sugar/fs';
+import __path from 'path';
 
 import { globSync as __globSync } from 'glob';
+import ComponentPackage from './ComponentsPackage.js';
 
-import { homedir as __homedir } from 'os';
+export default class Components {
+  private _sources: Record<string, ComponentSource> = {};
+  public settings: IComponentsSettings;
 
-export default class Component {
-  private static _sources: Record<string, ComponentSource> = {};
-  public static dir: string = `${__homedir()}/.lotsof/components`;
+  public get rootDir(): string {
+    return this.settings.rootDir;
+  }
 
-  static registerSourceFromMetas(
-    id: string,
-    sourceMetas: IComponentsSourceMetas,
+  constructor(settings: IComponentsSettings) {
+    this.settings = settings;
+  }
+
+  public registerSourceFromSettings(
+    settings: IComponentsSourceSettings,
   ): ComponentSource | undefined {
     let source: ComponentGitSource;
-    switch (sourceMetas.type) {
+    settings.components = this;
+    switch (settings.type) {
       case 'git':
-        source = new ComponentGitSource(
-          sourceMetas.name,
-          sourceMetas as IComponentsGitSourceMetas,
-        );
+        source = new ComponentGitSource(<IComponentGitSourceSettings>settings);
         break;
     }
     // @ts-ignore
     if (!source) {
       return;
     }
-    return this.registerSource(id, source);
+    return this.registerSource(source);
   }
 
-  static registerSource(id: string, source: ComponentSource): ComponentSource {
-    source.id = id;
-    this._sources[id] = source;
-    return this._sources[id];
+  public registerSource(source: ComponentSource): ComponentSource {
+    this._sources[source.id] = source;
+    return this._sources[source.id];
   }
 
-  static getSources(): Record<string, ComponentSource> {
+  public listSources(): Record<string, ComponentSource> {
     return this._sources;
   }
 
-  static async updateSources(): Promise<IComponentsSourceUpdateResult> {
+  public async updateSources(): Promise<IComponentsSourcesUpdateResult> {
     // updating sources
-    for (let [sourceId, source] of Object.entries(this.getSources())) {
+    for (let [sourceId, source] of Object.entries(this.listSources())) {
       await source.update();
     }
 
-    return {};
+    return {
+      sources: this.listSources(),
+    };
   }
 
-  static listPackages(): Record<string, ComponentPackage> {
+  public listPackages(sourceIds?: string[]): Record<string, ComponentPackage> {
     const packages: Record<string, ComponentPackage> = {};
-    const lotsofJsons = __globSync([
-      `${this.dir}/*/lotsof.json`,
-      `${this.dir}/*/*/lotsof.json`,
+
+    // list components in the root folder
+    const lotsofJsonFiles = __globSync([
+      `${this.rootDir}/*/lotsof.json`,
+      `${this.rootDir}/*/*/lotsof.json`,
     ]);
 
-    for (let [i, lotsofJsonPath] of lotsofJsons.entries()) {
-      const lotsofJson = __readJsonSync(lotsofJsonPath);
-
-      const p = new ComponentPackage(
-        `${lotsofJsonPath.replace('/lotsof.json', '')}`,
-      );
-      packages[lotsofJson.name] = p;
+    for (let [i, jsonPath] of lotsofJsonFiles.entries()) {
+      const p = new ComponentPackage({
+        rootDir: __path.dirname(jsonPath),
+        components: this,
+      });
+      packages[p.name] = p;
     }
 
     return packages;
   }
 
-  static async listComponents(sourceIds?: string[]): Promise<IComponentsList> {
-    const componentsList: IComponentsList = {
-      sources: this.getSources(),
-      packages: this.listPackages(),
-      components: {},
-    };
+  public listComponents(sourceIds?: string[]): Record<string, IComponent> {
+    let componentsList: Record<string, IComponent> = {};
 
-    const packages = this.listPackages();
-    for (let [packageName, packageObj] of Object.entries(packages)) {
-      const components = packageObj.listComponents();
-      for (let [componentId, component] of Object.entries(components)) {
-        componentsList.components[`${packageName}/${component.name}`] =
-          component;
-      }
+    const packages = this.listPackages(sourceIds);
+
+    for (let [packageName, p] of Object.entries(packages)) {
+      const components = p.listComponents();
+      componentsList = {
+        ...componentsList,
+        ...components,
+      };
     }
 
     return componentsList;

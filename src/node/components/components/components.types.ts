@@ -1,54 +1,51 @@
-import ComponentPackage from './ComponentsPackage.js';
+import Components from './Components.js';
+import ComponentsPackage from './ComponentsPackage.js';
+import ComponentsSource from './ComponentsSource.js';
 
-export interface IComponentsSourceMetas {
-  name: string;
-  type: string;
-  dir: string;
-}
-
-export interface IComponentsGitSourceMetas extends IComponentsSourceMetas {
-  repository: string;
-  settings?: IComponentGitSourceSettings;
-}
-
-export interface IComponentSource extends IComponentsSourceMetas {
-  metas(): IComponentsSourceMetas;
-  list(args: IComponentsListArgs): IComponentsList;
-}
+export interface IComponentsSourceMetas {}
 
 export interface IComponentsSourceSettings {
-  rootDir: string;
+  id: string;
+  name: string;
+  type: 'git';
+  components: Components;
 }
 
-export interface IComponentGitSourceSettings
-  extends IComponentsSourceSettings {}
-
-export interface IComponentsPackageSettings {}
-
-export interface IComponentsPackageMetas {
-  dir: string;
+export interface IComponentGitSourceSettings extends IComponentsSourceSettings {
+  repository: string;
 }
 
-export interface IComponent {
+export interface IComponentsPackageJson {
   version: string;
   name: string;
   description?: string;
-  package: ComponentPackage;
+}
+
+export interface IComponentsPackageSettings {
+  rootDir: string;
+  components: Components;
+}
+
+export interface IComponentJson {
+  version: string;
+  name: string;
+  description?: string;
+}
+
+export interface IComponent extends IComponentJson {
+  package: ComponentsPackage;
   path: string;
   absPath: string;
 }
 
-export interface IComponentPackage {
-  name: string;
-  path: string;
+export interface IComponentsSettings {
+  rootDir: string;
 }
 
-export interface IComponentsSourceUpdateResult {}
-
-export interface IComponentsList {
-  sources: Record<string, IComponentsSourceMetas>;
-  packages: Record<string, ComponentPackage>;
-  components: Record<string, IComponent>;
+export interface IComponentsSourceUpdateResult {
+  updated: boolean;
 }
 
-export interface IComponentsListArgs {}
+export interface IComponentsSourcesUpdateResult {
+  sources: Record<string, ComponentsSource>;
+}

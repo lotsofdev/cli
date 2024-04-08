@@ -14,7 +14,7 @@ export default class ComponentPackage {
             dir: this.dir,
         };
     }
-    listComponents() {
+    getComponents() {
         var _a;
         // reading the "lotsof.json" file
         const lotsofJson = __readJsonSync(`${this.dir}/lotsof.json`), componentsList = {};

@@ -12,7 +12,6 @@ import { __parseHtml } from '@lotsof/sugar/console';
 import { __dirname, __readJsonSync } from '@lotsof/sugar/fs';
 import { __packageRootDir } from '@lotsof/sugar/path';
 import __Components from './Components.js';
-// get the lotsof file path from this package to register defaults
 const packageRootDir = __packageRootDir(__dirname()), lotsofJson = __readJsonSync(`${packageRootDir}/lotsof.json`);
 for (let [id, sourceMetas] of Object.entries((_a = lotsofJson.components) === null || _a === void 0 ? void 0 : _a.sources)) {
     __Components.registerSourceFromMetas(id, sourceMetas);
@@ -35,18 +34,38 @@ export default function __registerCommands(program) {
             console.log(`<bgYellow> </bgYellow>   <cyan>${component.package.name}</cyan>/${component.name} (<magenta>${component.version}</magenta>)`);
         }
     }));
+    program
+        .command('components.add')
+        .argument('<componentId>', 'Specify the component id you want to add')
+        .option('--dir <path>', 'Specify the directory to install the component in', `${__packageRootDir()}/src/components`)
+        .option('--override', 'Override existing components with the same name', false)
+        .option('-y', 'Specify if you want to answer yes to all questions', false)
+        .action((componentId, options) => __awaiter(this, void 0, void 0, function* () {
+        console.log(`Adding component <yellow>${componentId}</yellow>...`);
+        const res = yield _components.addComponent(componentId, options);
+        function printComponent(component, level = 0) {
+            if (!component) {
+                return;
+            }
+            console.log(`<yellow>│</yellow> (<magenta>${component.version}</magenta>) <yellow>${component.package.name}/${component.name}</yellow>`);
+            // console.log(
+            //   `<yellow>│</yellow>      <cyan>${component.absPath}</cyan>`,
+            // );
+            if (component.dependencies) {
+                for (let [dependencyId, dependency] of Object.entries(component.dependencies)) {
+                    printComponent(dependency, level + 1);
+                }
+            }
+        }
+        console.log(`Added component(s):`);
+        console.log(' ');
+        printComponent(res === null || res === void 0 ? void 0 : res.component);
+    }));
     program.command('components.update').action(() => __awaiter(this, void 0, void 0, function* () {
         console.log(`Updating components from <yellow>${Object.keys(__Components.getSources()).length}</yellow> source(s)...`);
         // update sources
         yield __Components.updateSources();
         console.log('Components updated <green>successfully!</green>');
     }));
-    program
-        .command('components.add <components...> ')
-        .description('add one or more components into your project')
-        .action((components) => {
-        console.log(components);
-        console.log('clone command called');
-    });
 }
 //# sourceMappingURL=components.api.js.map

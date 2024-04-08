@@ -2,7 +2,7 @@ import type {
   IComponentsSourceMetas,
   IComponentsSourceSettings,
   IComponentsSourceUpdateResult,
-} from './components.types.js';
+} from './Components.types.js';
 
 import __Component from './Components.js';
 
@@ -47,7 +47,11 @@ export default abstract class ComponentSource {
       lotsofJson.components?.dependencies ?? {},
     )) {
       // if source already registered, avoid continue
+<<<<<<< Updated upstream
       if (__Component.getSources()[id]) {
+=======
+      if (this.components?.getSources()[id]) {
+>>>>>>> Stashed changes
         continue;
       }
 

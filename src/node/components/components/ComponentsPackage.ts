@@ -2,7 +2,7 @@ import type {
   IComponent,
   IComponentsPackageMetas,
   IComponentsPackageSettings,
-} from './components.types.js';
+} from './Components.types.js';
 
 import { __existsSync } from '@lotsof/sugar/fs';
 
@@ -32,7 +32,7 @@ export default class ComponentPackage {
     };
   }
 
-  listComponents(): Record<string, IComponent> {
+  getComponents(): Record<string, IComponent> {
     // reading the "lotsof.json" file
     const lotsofJson = __readJsonSync(`${this.dir}/lotsof.json`),
       componentsList: Record<string, IComponent> = {};

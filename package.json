@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsc --watch",
-    "build": "tsc",
+    "build": "tsc && npm run build.permissions",
+    "build.permissions": "chmod +x ./dist/node/index.js",
     "test": "vitest"
   },
   "bin": {
@@ -33,6 +34,7 @@
     "@lotsof/sugar": "^0.0.1",
     "commander": "^12.0.0",
     "figlet": "^1.7.0",
-    "glob": "^10.3.10"
+    "glob": "^10.3.10",
+    "inquirer": "^9.2.17"
   }
 }

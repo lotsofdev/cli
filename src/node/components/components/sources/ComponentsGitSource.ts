@@ -3,7 +3,12 @@ import ComponentSource from '../ComponentsSource.js';
 import type {
   IComponentsGitSourceMetas,
   IComponentsSourceUpdateResult,
+<<<<<<< Updated upstream
 } from '../components.types.js';
+=======
+} from '../Components.types.js';
+import ComponentSource from '../ComponentsSource.js';
+>>>>>>> Stashed changes
 
 export default class GitSource extends ComponentSource {
   private _repositoryUrl: string;

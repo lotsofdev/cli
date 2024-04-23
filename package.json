@@ -32,6 +32,8 @@
   },
   "dependencies": {
     "@lotsof/sugar": "^0.0.1",
+    "@lotsof/docmap": "^0.0.1",
+    "@lotsof/config": "^0.0.1",
     "commander": "^12.0.0",
     "figlet": "^1.7.0",
     "glob": "^10.3.10",

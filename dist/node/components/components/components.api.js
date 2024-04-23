@@ -8,7 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var _a;
-import { __parseHtml } from '@lotsof/sugar/console';
 import { __dirname, __readJsonSync } from '@lotsof/sugar/fs';
 import { __packageRootDir } from '@lotsof/sugar/path';
 import __Components from './Components.js';
@@ -22,15 +21,6 @@ for (let [id, sourceSettings] of Object.entries((_a = lotsofJson.components) ===
     sourceSettings.id = id;
     _components.registerSourceFromSettings(sourceSettings);
 }
-const nativeConsoleLog = console.log;
-console.log = (...args) => {
-    args.forEach((arg) => {
-        if (typeof arg === 'string') {
-            arg = __parseHtml(arg);
-        }
-        nativeConsoleLog(arg);
-    });
-};
 export default function __registerCommands(program) {
     program.command('components.ls').action(() => __awaiter(this, void 0, void 0, function* () {
         const sourcesCount = Object.keys(_components.getSources()).length;

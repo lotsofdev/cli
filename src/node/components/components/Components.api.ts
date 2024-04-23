@@ -1,4 +1,3 @@
-import { __parseHtml } from '@lotsof/sugar/console';
 import { __dirname, __readJsonSync } from '@lotsof/sugar/fs';
 import { __packageRootDir } from '@lotsof/sugar/path';
 import __Components from './Components.js';
@@ -24,16 +23,6 @@ for (let [id, sourceSettings] of Object.entries(
     <IComponentsSourceSettings>sourceSettings,
   );
 }
-
-const nativeConsoleLog = console.log;
-console.log = (...args): void => {
-  args.forEach((arg) => {
-    if (typeof arg === 'string') {
-      arg = __parseHtml(arg);
-    }
-    nativeConsoleLog(arg);
-  });
-};
 
 export default function __registerCommands(program: any): void {
   program.command('components.ls').action(async () => {

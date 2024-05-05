@@ -1,9 +1,8 @@
 import Docmap, { __defaults } from '@lotsof/docmap';
-import { __packageRootDir } from '@lotsof/sugar/package';
 
 import { __deepMerge } from '@lotsof/sugar/object';
 
-import { __getConfig, __loadConfig } from '@lotsof/config';
+import { __loadConfig } from '@lotsof/config';
 
 export default function __registerCommands(program: any): void {
   program
@@ -23,9 +22,15 @@ export default function __registerCommands(program: any): void {
       'Specify the globs to use to search for files to parse',
       undefined,
     )
+    .option(
+      '--mdx',
+      'Specify if the output have to be .mdx files or .json files when setting up the <outDir> option',
+      false
+    )
     .action(async (args) => {
       const config = await __loadConfig('docmap'),
         finalConfig = __deepMerge(config, args);
+
       const docmap = new Docmap();
       await docmap.build(finalConfig);
     });

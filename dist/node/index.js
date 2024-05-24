@@ -1,9 +1,19 @@
 #!/usr/bin/env -S node --experimental-json-modules --trace-warnings --trace-uncaught --no-warnings --es-module-specifier-resolution node
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { Command as __Command } from 'commander';
 import __figlet from 'figlet';
 import { __parseHtml } from '@lotsof/sugar/console';
 // @ts-ignore
 import __packageJson from '../../package.json' assert { type: 'json' };
+import { __loadConfig } from '@lotsof/config';
 import __registerComponentsCommands from './components/components/Components.api.js';
 import __registerDocmapCommands from './components/docmap/Docmap.api.js';
 const nativeConsoleLog = console.log;
@@ -18,10 +28,12 @@ console.log = (...args) => {
 const program = new __Command();
 console.log(__figlet.textSync('Lotsof'));
 program.version(__packageJson.version).description(__packageJson.description);
+program.hook('preAction', () => __awaiter(void 0, void 0, void 0, function* () {
+    yield __loadConfig();
+}));
 // docmap
 __registerDocmapCommands(program);
 // components
 __registerComponentsCommands(program);
 program.parse(process.argv);
-const options = program.opts();
 //# sourceMappingURL=index.js.map

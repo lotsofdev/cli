@@ -1,8 +1,5 @@
-import Docmap, { __defaults } from '@lotsof/docmap';
-
-import { __deepMerge } from '@lotsof/sugar/object';
-
-import { __loadConfig } from '@lotsof/config';
+import __Docmap, { IDocmapBuildParams, __defaults } from '@lotsof/docmap';
+import { __diff } from '@lotsof/sugar/object';
 
 export default function __registerCommands(program: any): void {
   program
@@ -15,23 +12,33 @@ export default function __registerCommands(program: any): void {
     .option(
       '--outDir <dir>',
       'Specify the directory where to output the generated docmaps',
-      undefined,
+      __defaults.build.outDir,
     )
     .option(
       '--globs <globs>',
       'Specify the globs to use to search for files to parse',
-      undefined,
+      __defaults.build.globs,
+    )
+    .option(
+      '--save',
+      'Specify if you want to save the generated files',
+      __defaults.build.save,
     )
     .option(
       '--mdx',
-      'Specify if the output have to be .mdx files or .json files when setting up the <outDir> option',
-      false
+      'Specify if you want to have the .json files generated when setting up the <outDir> option',
+      __defaults.build.mdx,
+    )
+    .option(
+      '--json',
+      'Specify if you want to have the .json files generated when setting up the <outDir> option',
+      __defaults.build.json,
     )
     .action(async (args) => {
-      const config = await __loadConfig('docmap'),
-        finalConfig = __deepMerge(config, args);
-
-      const docmap = new Docmap();
-      await docmap.build(finalConfig);
+      const finalParams: IDocmapBuildParams = __diff(__defaults.build, args, {
+        added: false,
+      });
+      const docmap = new __Docmap();
+      await docmap.build(finalParams);
     });
 }

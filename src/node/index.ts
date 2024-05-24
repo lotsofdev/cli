@@ -8,6 +8,7 @@ import { __parseHtml } from '@lotsof/sugar/console';
 // @ts-ignore
 import __packageJson from '../../package.json' assert { type: 'json' };
 
+import { __loadConfig } from '@lotsof/config';
 import __registerComponentsCommands from './components/components/Components.api.js';
 import __registerDocmapCommands from './components/docmap/Docmap.api.js';
 
@@ -27,6 +28,10 @@ console.log(__figlet.textSync('Lotsof'));
 
 program.version(__packageJson.version).description(__packageJson.description);
 
+program.hook('preAction', async () => {
+  await __loadConfig();
+});
+
 // docmap
 __registerDocmapCommands(program);
 
@@ -34,5 +39,3 @@ __registerDocmapCommands(program);
 __registerComponentsCommands(program);
 
 program.parse(process.argv);
-
-const options = program.opts();

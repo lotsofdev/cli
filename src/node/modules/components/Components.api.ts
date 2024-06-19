@@ -108,6 +108,7 @@ export default function __registerCommands(program: any): void {
         );
 
         console.log(component.package.dependencies);
+        u;
 
         if (component.dependencies) {
           for (let [dependencyId, dependency] of Object.entries(

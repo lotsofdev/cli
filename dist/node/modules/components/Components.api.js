@@ -70,6 +70,7 @@ export default function __registerCommands(program) {
             }
             console.log(`<yellow>│</yellow> (<magenta>${component.version}</magenta>) <yellow>${component.package.name}/${component.name}</yellow>`);
             console.log(component.package.dependencies);
+            u;
             if (component.dependencies) {
                 for (let [dependencyId, dependency] of Object.entries(component.dependencies)) {
                     printComponent(dependency, level + 1);

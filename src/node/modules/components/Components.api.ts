@@ -107,6 +107,8 @@ export default function __registerCommands(program: any): void {
           `<yellow>│</yellow> (<magenta>${component.version}</magenta>) <yellow>${component.package.name}/${component.name}</yellow>`,
         );
 
+        console.log(component.package.dependencies);
+
         if (component.dependencies) {
           for (let [dependencyId, dependency] of Object.entries(
             component.dependencies,

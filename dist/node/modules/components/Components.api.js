@@ -7,22 +7,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var _a;
 import { __dirname, __readJsonSync } from '@lotsof/sugar/fs';
-import { __packageRootDir } from '@lotsof/sugar/path';
-import __Components from './Components.js';
+import { __packageRootDir } from '@lotsof/sugar/package';
+import __Components from '@lotsof/components';
 import { __getConfig } from '@lotsof/config';
-import { homedir as __homedir } from 'os';
-// get the lotsof file path from this package to register defaults
-const packageRootDir = __packageRootDir(__dirname()), lotsofJson = __readJsonSync(`${packageRootDir}/lotsof.json`);
-const _components = new __Components({
-    rootDir: `${__homedir()}/.lotsof/components`,
-});
-for (let [id, sourceSettings] of Object.entries((_a = lotsofJson.components) === null || _a === void 0 ? void 0 : _a.sources)) {
-    sourceSettings.id = id;
-    _components.registerSourceFromSettings(sourceSettings);
+let _components;
+function setup() {
+    // get the lotsof file path from this package to register defaults
+    const packageRootDir = __packageRootDir(__dirname()), componentsJson = __readJsonSync(`${packageRootDir}/components.json`);
+    _components = new __Components();
+    for (let [id, sourceSettings] of Object.entries(componentsJson.sources)) {
+        sourceSettings.id = id;
+        _components.registerSourceFromSettings(sourceSettings);
+    }
 }
 export default function __registerCommands(program) {
+    program.hook('preAction', () => __awaiter(this, void 0, void 0, function* () {
+        setup();
+    }));
     program.command('components.sources.ls').action(() => __awaiter(this, void 0, void 0, function* () {
         console.log(`Listing sources...`);
         console.log(' ');
@@ -57,7 +59,7 @@ export default function __registerCommands(program) {
         .option('--engine', 'Specify the engine to use')
         .option('-y', 'Specify if you want to answer yes to all questions', false)
         .action((componentId, options) => __awaiter(this, void 0, void 0, function* () {
-        var _a;
+        var _a, _b;
         console.log(`Adding component <yellow>${componentId}</yellow>...`);
         // extends options with defaults
         options = Object.assign(Object.assign({}, options), ((_a = __getConfig('components.defaults')) !== null && _a !== void 0 ? _a : {}));
@@ -76,7 +78,8 @@ export default function __registerCommands(program) {
         if (!res) {
             return;
         }
-        console.log(`Added component(s):`);
+        console.log(' ');
+        console.log(`Added component${Object.keys((_b = res.component) === null || _b === void 0 ? void 0 : _b.dependencies).length ? 's' : ''}:`);
         console.log(' ');
         printComponent(res === null || res === void 0 ? void 0 : res.component);
     }));

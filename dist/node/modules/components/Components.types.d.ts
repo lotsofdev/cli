@@ -7,10 +7,13 @@ export interface IComponentsSourceSettings {
     id: string;
     name: string;
     type: 'git';
-    components: Components;
+    $components: Components;
 }
-export interface IComponentsDefaults {
-    engine: string;
+export interface IComponentsConfig {
+    settings: IComponentsSettings;
+}
+export interface IComponentDefaults {
+    engine?: string;
 }
 export interface IComponentGitSourceSettings extends IComponentsSourceSettings {
     url: string;
@@ -22,7 +25,7 @@ export interface IComponentsPackageJson {
 }
 export interface IComponentsPackageSettings {
     rootDir: string;
-    components: Components;
+    $components: Components;
 }
 export interface IComponentJsonSubset {
     type: 'list';
@@ -40,11 +43,12 @@ export interface IComponentJson {
 export interface IComponent extends IComponentJson {
     package: ComponentsPackage;
     path: string;
-    absPath: string;
+    relPath: string;
 }
 export interface IComponentsSettings {
-    rootDir: string;
-    defaults: IComponentsDefaults;
+    libraryRootDir: string;
+    stateFilePath: string;
+    defaults: IComponentDefaults;
 }
 export interface IComponentsSourceUpdateResult {
     updated: boolean;
@@ -56,6 +60,7 @@ export interface IComponentsAddComponentOptions {
     dir: string;
     y: boolean;
     override: boolean;
+    engine?: string;
 }
 export interface IComponentsAddComponentResult {
     component: IComponent;

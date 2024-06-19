@@ -9,15 +9,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import __inquier from 'inquirer';
 import * as __glob from 'glob';
+import { __folderHashSync } from '@lotsof/sugar/fs';
 import ComponentGitSource from './sources/ComponentsGitSource.js';
-import { __packageRootDir } from '@lotsof/sugar/path';
+import { __packageRootDir } from '@lotsof/sugar/package';
 import { __copySync, __ensureDirSync, __existsSync, __readJsonSync, __removeSync, } from '@lotsof/sugar/fs';
 import __path from 'path';
 import { globSync as __globSync } from 'glob';
 import ComponentPackage from './ComponentsPackage.js';
 export default class Components {
-    get rootDir() {
-        return this.settings.rootDir;
+    get hashFilePath() {
+        var _a;
+        return (_a = this.settings.hashFilePath) !== null && _a !== void 0 ? _a : `${this.libraryRootDir}/.lotsof.hash`;
+    }
+    get libraryRootDir() {
+        return this.settings.libraryRootDir;
     }
     constructor(settings) {
         this._sources = {};
@@ -25,7 +30,7 @@ export default class Components {
     }
     registerSourceFromSettings(settings) {
         let source;
-        settings.components = this;
+        settings.$components = this;
         switch (settings.type) {
             case 'git':
                 source = new ComponentGitSource(settings);
@@ -60,13 +65,13 @@ export default class Components {
         const packages = {};
         // list components in the root folder
         const lotsofJsonFiles = __globSync([
-            `${this.rootDir}/*/lotsof.json`,
-            `${this.rootDir}/*/*/lotsof.json`,
+            `${this.libraryRootDir}/*/lotsof.json`,
+            `${this.libraryRootDir}/*/*/lotsof.json`,
         ]);
         for (let [i, jsonPath] of lotsofJsonFiles.entries()) {
             const p = new ComponentPackage({
                 rootDir: __path.dirname(jsonPath),
-                components: this,
+                $components: this,
             });
             packages[p.name] = p;
         }
@@ -139,20 +144,20 @@ export default class Components {
             // ensure the directory exists
             __ensureDirSync(options.dir);
             // read the component.json file
-            const componentJson = __readJsonSync(`${component.absPath}/component.json`);
+            const componentJson = __readJsonSync(`${component.path}/component.json`);
             // copy the component to the specified directory
             if (!componentJson.subset) {
                 // copy the entire component
-                __copySync(component.absPath, componentDir);
+                __copySync(component.path, componentDir);
             }
             else {
                 let answer, files = [], copyMap = {};
                 // add the "files" to the copy map
                 if (componentJson.files) {
                     for (let file of componentJson.files) {
-                        const resolvedFiles = __glob.sync(`${component.absPath}/${file}`);
+                        const resolvedFiles = __glob.sync(`${component.path}/${file}`);
                         for (let resolvedFile of resolvedFiles) {
-                            const relPath = resolvedFile.replace(`${component.absPath}/`, '');
+                            const relPath = resolvedFile.replace(`${component.path}/`, '');
                             copyMap[resolvedFile] = `${options.dir}/${component.name}/${relPath}`;
                         }
                     }
@@ -178,9 +183,9 @@ export default class Components {
                     }
                     // copy the files
                     for (let file of files) {
-                        const resolvedFiles = __glob.sync(`${component.absPath}/${file}`);
+                        const resolvedFiles = __glob.sync(`${component.path}/${file}`);
                         for (let resolvedFile of resolvedFiles) {
-                            const relPath = resolvedFile.replace(`${component.absPath}/`, '');
+                            const relPath = resolvedFile.replace(`${component.path}/`, '');
                             copyMap[resolvedFile] = `${options.dir}/${component.name}/${relPath}`;
                         }
                     }
@@ -194,6 +199,10 @@ export default class Components {
                     __copySync(from, to);
                 }
             }
+            // save the installed component hash
+            const installedComponentHash = __folderHashSync(componentDir);
+            // save the installed component hash
+            const installedComponentHashFilePath = `${componentDir}/.lotsof.hash`;
             // handle dependencies
             if (componentJson.dependencies) {
                 const dependencies = {};

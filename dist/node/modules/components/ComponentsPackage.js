@@ -43,8 +43,8 @@ export default class ComponentPackage {
                 }
                 const componentJson = __readJsonSync(componentJsonPath);
                 componentJson.package = this;
-                componentJson.path = componentPath;
-                componentJson.absPath = `${this.rootDir}/${componentPath}`;
+                componentJson.path = `${this.rootDir}/${componentPath}`;
+                componentJson.relPath = componentPath;
                 componentsList[`${this.name}/${componentJson.name}`] = componentJson;
             }
         }

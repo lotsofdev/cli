@@ -14,8 +14,8 @@ import { __parseHtml } from '@lotsof/sugar/console';
 // @ts-ignore
 import __packageJson from '../../package.json' assert { type: 'json' };
 import { __loadConfig } from '@lotsof/config';
-import __registerComponentsCommands from './components/components/Components.api.js';
-import __registerDocmapCommands from './components/docmap/Docmap.api.js';
+import __registerComponentsCommands from './modules/components/Components.api.js';
+import __registerDocmapCommands from './modules/docmap/Docmap.api.js';
 const nativeConsoleLog = console.log;
 console.log = (...args) => {
     args.forEach((arg) => {

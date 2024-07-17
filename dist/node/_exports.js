@@ -1,2 +1,2 @@
-export * from './modules/components/_exports.js';
+export {};
 //# sourceMappingURL=_exports.js.map

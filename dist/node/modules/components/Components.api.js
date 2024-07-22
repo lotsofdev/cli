@@ -60,12 +60,12 @@ export default function __registerCommands(program) {
         .option('--engine', 'Specify the engine to use')
         .option('-y', 'Specify if you want to answer yes to all questions', false)
         .action((componentId, options) => __awaiter(this, void 0, void 0, function* () {
-        var _a, _b;
+        var _a;
         console.log(`▓ Adding component <yellow>${componentId}</yellow>...`);
         // extends options with defaults
         options = Object.assign(Object.assign({}, options), ((_a = __getConfig('components.defaults')) !== null && _a !== void 0 ? _a : {}));
         const res = yield _components.addComponent(componentId, options);
-        function printComponent(component, level = 0) {
+        function printComponent(component) {
             var _a, _b;
             if (!component) {
                 return;
@@ -78,11 +78,9 @@ export default function __registerCommands(program) {
                 for (let [dependencyId, dependency] of Object.entries(
                 // @ts-ignore
                 component.dependencies)) {
+                    console.log(
                     // @ts-ignore
-                    if (dependency.type === 'component') {
-                        // @ts-ignore
-                        printComponent(dependency, level + 1);
-                    }
+                    `│ - <cyan>${dependency.type}</cyan> <yellow>${dependency.name}</yellow> <magenta>${component.version}</magenta>`);
                 }
             }
         }
@@ -90,8 +88,10 @@ export default function __registerCommands(program) {
             return;
         }
         console.log(' ');
-        console.log(`▓ Added component${Object.keys((_b = res.component) === null || _b === void 0 ? void 0 : _b.dependencies).length ? 's' : ''}:`);
-        printComponent(res === null || res === void 0 ? void 0 : res.component);
+        console.log(`▓ Added component${Object.keys(res.addedComponents).length ? 's' : ''}:`);
+        for (let [componentName, component] of Object.entries(res.addedComponents)) {
+            printComponent(component);
+        }
     }));
     program.command('components.update').action(() => __awaiter(this, void 0, void 0, function* () {
         console.log(`▓ Start updating components libraries...`);

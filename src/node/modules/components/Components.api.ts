@@ -98,7 +98,6 @@ export default function __registerCommands(program: any): void {
 
       function printComponent(
         component: __ComponentsDependency | __ComponentsComponent | undefined,
-        level = 0,
       ): void {
         if (!component) {
           return;
@@ -116,11 +115,10 @@ export default function __registerCommands(program: any): void {
             // @ts-ignore
             component.dependencies,
           )) {
-            // @ts-ignore
-            if (dependency.type === 'component') {
+            console.log(
               // @ts-ignore
-              printComponent(dependency, level + 1);
-            }
+              `│ - <cyan>${dependency.type}</cyan> <yellow>${dependency.name}</yellow> <magenta>${component.version}</magenta>`,
+            );
           }
         }
       }
@@ -132,10 +130,14 @@ export default function __registerCommands(program: any): void {
       console.log(' ');
       console.log(
         `▓ Added component${
-          Object.keys(res.component?.dependencies).length ? 's' : ''
+          Object.keys(res.addedComponents).length ? 's' : ''
         }:`,
       );
-      printComponent(res?.component);
+      for (let [componentName, component] of Object.entries(
+        res.addedComponents,
+      )) {
+        printComponent(component);
+      }
     });
 
   program.command('components.update').action(async () => {

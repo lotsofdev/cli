@@ -36,6 +36,7 @@
     "@lotsof/config": "^1.0.0",
     "@lotsof/docmap": "^1.0.0",
     "@lotsof/components": "^1.0.0",
+    "@lotsof/factory": "^1.0.0",
     "@lotsof/sugar": "^1.0.0",
     "commander": "^12.0.0",
     "figlet": "^1.7.0",

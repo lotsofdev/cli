@@ -6,14 +6,12 @@ import type { IFactoryConfig } from '@lotsof/factory';
 
 import { __getConfig } from '@lotsof/config';
 
-import { IComponentsConfig } from '@lotsof/components';
 import '@lotsof/factory';
 
-let factoryConfig: IFactoryConfig, componentsConfig: IComponentsConfig;
+let factoryConfig: IFactoryConfig;
 
 function setup() {
   factoryConfig = __getConfig().factory;
-  componentsConfig = __getConfig().components;
 }
 
 export default function __registerCommands(program: any): void {

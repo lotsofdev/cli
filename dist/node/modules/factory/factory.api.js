@@ -11,10 +11,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import __childProcess from 'child_process';
 import { __getConfig } from '@lotsof/config';
 import '@lotsof/factory';
-let factoryConfig, componentsConfig;
+let factoryConfig;
 function setup() {
     factoryConfig = __getConfig().factory;
-    componentsConfig = __getConfig().components;
 }
 export default function __registerCommands(program) {
     program.hook('preAction', () => __awaiter(this, void 0, void 0, function* () {

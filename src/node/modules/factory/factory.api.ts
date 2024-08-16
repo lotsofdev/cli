@@ -2,13 +2,13 @@
 
 import __childProcess from 'child_process';
 
-import type { IFactoryConfig } from '@lotsof/factory';
+import type { TFactoryConfig } from '@lotsof/factory';
 
 import { __getConfig } from '@lotsof/config';
 
 import '@lotsof/factory';
 
-let factoryConfig: IFactoryConfig;
+let factoryConfig: TFactoryConfig;
 
 function setup() {
   factoryConfig = __getConfig().factory;

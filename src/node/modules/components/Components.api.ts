@@ -5,8 +5,8 @@ import { __getConfig } from '@lotsof/config';
 
 // @ts-ignore
 import __Components, {
-  IComponentsComponentsJson,
-  IComponentsLibrarySettings,
+  TComponentsComponentsJson,
+  TComponentsLibrarySettings,
   __ComponentsComponent,
   __ComponentsDependency,
 } from '@lotsof/components';
@@ -19,7 +19,7 @@ function setup() {
 
   // get the lotsof file path from this package to register defaults
   const packageRootDir = __packageRootDir(__dirname()),
-    componentsJson: IComponentsComponentsJson = __readJsonSync(
+    componentsJson: TComponentsComponentsJson = __readJsonSync(
       `${packageRootDir}/components.json`,
     );
 
@@ -28,7 +28,7 @@ function setup() {
   )) {
     librarySettings.name = name;
     _components.registerLibraryFromSettings(
-      <IComponentsLibrarySettings>librarySettings,
+      <TComponentsLibrarySettings>librarySettings,
     );
   }
 }

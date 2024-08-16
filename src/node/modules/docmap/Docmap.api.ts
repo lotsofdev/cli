@@ -1,4 +1,4 @@
-import __Docmap, { IDocmapBuildParams, __defaults } from '@lotsof/docmap';
+import __Docmap, { TDocmapBuildParams, __defaults } from '@lotsof/docmap';
 import { __diff } from '@lotsof/sugar/object';
 
 export default function __registerCommands(program: any): void {
@@ -35,7 +35,7 @@ export default function __registerCommands(program: any): void {
       __defaults.build.json,
     )
     .action(async (args) => {
-      const finalParams: IDocmapBuildParams = __diff(__defaults.build, args, {
+      const finalParams: TDocmapBuildParams = __diff(__defaults.build, args, {
         added: false,
       });
       const docmap = new __Docmap();
